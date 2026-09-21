@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Ticketio.Auth.Api.Interfaces.Services;
 using Ticketio.Auth.Api.Models.Requests;
 
@@ -42,5 +43,22 @@ public class AuthController : BaseController
 
         var response = await _authService.Refresh(request);
         return SetResponse(response.StatusCode, response);
+    }
+
+
+    [HttpPost("recovery")]
+    public async Task<IActionResult> Recovery(TokenRequest request)
+    {
+        _logger.LogInformation($"Forgot password request");
+
+        return SetResponse(HttpStatusCode.NotImplemented, "Not implemented");
+    }
+
+    [HttpPost("reset")]
+    public async Task<IActionResult> Reset(TokenRequest request)
+    {
+        _logger.LogInformation($"Reset password request");
+
+        return SetResponse(HttpStatusCode.NotImplemented, "Not implemented");
     }
 }

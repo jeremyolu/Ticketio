@@ -100,5 +100,22 @@ public class AuthRepository : IAuthRepository
 
         return await connection.ExecuteAsync(sql, new { userId }) > 0;
     }
+
+    public async Task<bool> CreatePasswordResetToken(PasswordResetToken token)
+    {
+        var sql = "INSERT INTO PasswordResetTokens (UserId, TokenHash, CreatedDate, ExpiryDate) VALUES (@userId, @tokenHash, @createdDate, @expiryDate);";
+
+        using var connection = _connectionFactory.CreateConnection();
+
+        var rowsAffected = await connection.ExecuteAsync(sql, new
+        {
+            token.UserId,
+            token.TokenHash,
+            token.CreatedDate,
+            token.ExpiryDate
+        });
+
+        return rowsAffected > 0;
+    }
 }
 

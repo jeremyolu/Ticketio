@@ -139,7 +139,7 @@ public class AuthService : IAuthService
             return response;
         }
 
-        if (string.IsNullOrWhiteSpace(request.AccessToken) || string.IsNullOrWhiteSpace(request.RefreshToken))
+        if (string.IsNullOrWhiteSpace(request.RefreshToken))
         {
             response.Message = "Required tokens have not been provided.";
             response.StatusCode = HttpStatusCode.BadRequest;
@@ -181,6 +181,63 @@ public class AuthService : IAuthService
         }
 
         return response;
+    }
+
+    public async Task<AuthResponse<string>> ForgotPassword(ForgotPasswordRequest request)
+    {
+        var response = new AuthResponse<string>
+        {
+            StatusCode = HttpStatusCode.OK,
+            Message = "If an account exists for this email, a password reset link will be sent shortly."
+        };
+
+        if (request == null)
+        {
+            response.Message = "Auth request body is null.";
+            response.StatusCode = HttpStatusCode.BadRequest;
+            return response;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Email))
+        {
+            response.Message = "Email has not been provided.";
+            response.StatusCode = HttpStatusCode.BadRequest;
+            return response;
+        }
+
+        try
+        {
+            var user = await _authRepository.GetUserByEmail(request.Email);
+
+            if (user == null)
+                return response;
+
+            var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(GenerateToken())));
+
+            var passwordResetToken = new PasswordResetToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.UserId,
+                TokenHash = tokenHash,
+                CreatedDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddMinutes(30)
+            };
+
+            await _authRepository.CreatePasswordResetToken(passwordResetToken);
+
+            return response;
+
+        }
+        catch(Exception ex)
+        {
+            var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            _logger.LogCritical(errorMessage);
+
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            response.Message = "An error occurred while processing the request.";
+
+            return response;
+        }
     }
 
     private async Task<AuthToken> GenerateAndSaveTokens(User user)
@@ -228,13 +285,7 @@ public class AuthService : IAuthService
 
     private string GenerateToken()
     {
-        const int length = 70;
-
-        var randomBytes = new byte[length];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomBytes);
-
-        return Convert.ToBase64String(randomBytes);
+        return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
     }
 
     private string HashPassword(string password)

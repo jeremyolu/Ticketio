@@ -12,4 +12,5 @@ public interface IAuthRepository
     Task<Token?> GetToken(string refreshToken);
     Task<bool> MarkTokenAsUsed(Guid tokenId);
     Task<bool> RevokeToken(string refreshToken);
+    Task<bool> CreatePasswordResetToken(PasswordResetToken token);
 }
