@@ -47,15 +47,16 @@ public class AuthController : BaseController
 
 
     [HttpPost("recovery")]
-    public async Task<IActionResult> Recovery(TokenRequest request)
+    public async Task<IActionResult> Recovery(ForgotPasswordRequest request)
     {
         _logger.LogInformation($"Forgot password request");
 
-        return SetResponse(HttpStatusCode.NotImplemented, "Not implemented");
+        var response = await _authService.ForgotPassword(request);
+        return SetResponse(response.StatusCode, response);
     }
 
     [HttpPost("reset")]
-    public async Task<IActionResult> Reset(TokenRequest request)
+    public async Task<IActionResult> Reset()
     {
         _logger.LogInformation($"Reset password request");
 
