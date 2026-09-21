@@ -71,8 +71,12 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
-            response.Message = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            _logger.LogCritical(errorMessage);
+
             response.StatusCode = HttpStatusCode.InternalServerError;
+            response.Message = "An error occurred while processing the request.";
+
             return response;
         }
 
@@ -117,8 +121,12 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
-            response.Message = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            _logger.LogCritical(errorMessage);
+
             response.StatusCode = HttpStatusCode.InternalServerError;
+            response.Message = "An error occurred while processing the request.";
+
             return response;
         }
 
@@ -175,8 +183,12 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
-            response.Message = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            _logger.LogCritical(errorMessage);
+
             response.StatusCode = HttpStatusCode.InternalServerError;
+            response.Message = "An error occurred while processing the request.";
+
             return response;
         }
 
