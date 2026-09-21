@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/">
+    <Project Path="src/backend/Ticketio.Auth.Api/Ticketio.Auth.Api.csproj" />
+  </Folder>
+</Solution>
