@@ -96,8 +96,8 @@ public class AuthRepository : IAuthRepository
     public async Task<bool> MarkTokenAsUsed(TokenType tokenType, Guid tokenId, DateTime usedDate)
     {
         var sql = tokenType == TokenType.Refresh ? 
-            "UPDATE Tokens SET IsUsed = 1, UsedDate = @usedDate WHERE Id = @tokenId;" :
-            "UPDATE PasswordResetTokens SET IsUsed = 1, UsedDate = @usedDate WHERE Id = @tokenId";
+            "UPDATE Tokens SET UsedDate = @usedDate WHERE Id = @tokenId;" :
+            "UPDATE PasswordResetTokens SET UsedDate = @usedDate WHERE Id = @tokenId";
 
         using var connection = _connectionFactory.CreateConnection();
 
