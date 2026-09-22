@@ -9,5 +9,7 @@ public interface IAuthService
     Task<AuthResponse<string>> Register(RegisterRequest request);
     Task<AuthResponse<AuthToken>> Login(AuthRequest request);
     Task<AuthResponse<AuthToken>> Refresh(TokenRequest request);
-    Task<AuthResponse<string>> ForgotPassword(ForgotPasswordRequest request);
+    Task<AuthResponse<bool>> ForgotPassword(ForgotPasswordRequest request);
+    Task<AuthResponse<bool>> ValidateResetToken(string token);
+    Task<AuthResponse<bool>> ResetPassword(ResetPasswordRequest request);
 }
