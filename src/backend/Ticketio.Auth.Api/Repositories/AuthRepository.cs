@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Ticketio.Auth.Api.Enums;
 using Ticketio.Auth.Api.Interfaces.Factories;
 using Ticketio.Auth.Api.Interfaces.Repositories;
 using Ticketio.Auth.Api.Models.Data;
@@ -50,6 +51,15 @@ public class AuthRepository : IAuthRepository
         return rowsAffected > 0;
     }
 
+    public async Task<bool> UpdateUserPassword(Guid id, string password)
+    {
+        var sql = "UPDATE Users SET Password = @password WHERE UserId = @id";
+
+        using var connection = _connectionFactory.CreateConnection();
+
+        return await connection.ExecuteAsync(sql, new { id, password }) > 0;
+    }
+
     public async Task<bool> SaveToken(Token token)
     {
         var sql = "INSERT INTO Tokens (UserId, ExpiryDate) VALUES (@userId, @expiryDate);";
@@ -74,9 +84,20 @@ public class AuthRepository : IAuthRepository
         return await connection.QueryFirstOrDefaultAsync<Token>(sql, new { refreshToken });
     }
 
-    public async Task<bool> MarkTokenAsUsed(Guid tokenId)
+    public async Task<PasswordResetToken?> GetPasswordResetToken(string token)
     {
-        var sql = "UPDATE Tokens SET IsUsed = 1 WHERE Id = @tokenId;";
+        var sql = "SELECT * FROM PasswordResetTokens WHERE TokenHash = @token;";
+
+        using var connection = _connectionFactory.CreateConnection();
+
+        return await connection.QueryFirstOrDefaultAsync<PasswordResetToken>(sql, new { token });
+    }
+
+    public async Task<bool> MarkTokenAsUsed(TokenType tokenType, Guid tokenId, DateTime usedDate)
+    {
+        var sql = tokenType == TokenType.Refresh ? 
+            "UPDATE Tokens SET IsUsed = 1, UsedDate = @usedDate WHERE Id = @tokenId;" :
+            "UPDATE PasswordResetTokens SET IsUsed = 1, UsedDate = @usedDate WHERE Id = @tokenId";
 
         using var connection = _connectionFactory.CreateConnection();
 

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Ticketio.Auth.Api.Config;
+using Ticketio.Auth.Api.Enums;
 using Ticketio.Auth.Api.Interfaces.Repositories;
 using Ticketio.Auth.Api.Interfaces.Services;
 using Ticketio.Auth.Api.Models.Data;
@@ -72,7 +73,7 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
-            _logger.LogCritical(errorMessage);
+            _logger.LogError(errorMessage);
 
             response.StatusCode = HttpStatusCode.InternalServerError;
             response.Message = "An error occurred while processing the request.";
@@ -122,7 +123,7 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
-            _logger.LogCritical(errorMessage);
+            _logger.LogError(errorMessage);
 
             response.StatusCode = HttpStatusCode.InternalServerError;
             response.Message = "An error occurred while processing the request.";
@@ -177,14 +178,14 @@ public class AuthService : IAuthService
                 return response;
             }
 
-            await _authRepository.MarkTokenAsUsed(token.Id);
+            await _authRepository.MarkTokenAsUsed(TokenType.Refresh, token.Id, DateTime.UtcNow);
 
             response.Result = await GenerateAndSaveTokens(user);
         }
         catch (Exception ex)
         {
             var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
-            _logger.LogCritical(errorMessage);
+            _logger.LogError(errorMessage);
 
             response.StatusCode = HttpStatusCode.InternalServerError;
             response.Message = "An error occurred while processing the request.";
@@ -195,18 +196,20 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public async Task<AuthResponse<string>> ForgotPassword(ForgotPasswordRequest request)
+    public async Task<AuthResponse<bool>> ForgotPassword(ForgotPasswordRequest request)
     {
-        var response = new AuthResponse<string>
+        var response = new AuthResponse<bool>
         {
             StatusCode = HttpStatusCode.OK,
-            Message = "If an account exists for this email, a password reset link will be sent shortly."
+            Message = "If an account exists for this email, a password reset link will be sent shortly.",
+            Result = true
         };
 
         if (request == null)
         {
             response.Message = "Auth request body is null.";
             response.StatusCode = HttpStatusCode.BadRequest;
+            response.Result = false;
             return response;
         }
 
@@ -214,6 +217,7 @@ public class AuthService : IAuthService
         {
             response.Message = "Email has not been provided.";
             response.StatusCode = HttpStatusCode.BadRequest;
+            response.Result = false;
             return response;
         }
 
@@ -243,10 +247,115 @@ public class AuthService : IAuthService
         catch(Exception ex)
         {
             var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
-            _logger.LogCritical(errorMessage);
+            _logger.LogError(errorMessage);
 
             response.StatusCode = HttpStatusCode.InternalServerError;
             response.Message = "An error occurred while processing the request.";
+            response.Result = false;
+
+            return response;
+        }
+    }
+
+    public async Task<AuthResponse<bool>> ValidateResetToken(string token)
+    {
+        var response = new AuthResponse<bool>
+        {
+            StatusCode = HttpStatusCode.OK,
+            Result = true
+        };
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            response.Message = "Token has not been provided.";
+            response.StatusCode = HttpStatusCode.BadRequest;
+            response.Result = false;
+            return response;
+        }
+
+        try
+        {
+            var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+
+            var resetToken = await _authRepository.GetPasswordResetToken(tokenHash);
+
+            if (resetToken == null || resetToken.ExpiryDate < DateTime.UtcNow || resetToken.UsedDate != null)
+            {
+                response.Message = "Reset token is invalid.";
+                response.StatusCode = HttpStatusCode.Unauthorized;
+                response.Result = false;
+                return response;
+            }
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            _logger.LogError(errorMessage);
+
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            response.Message = "An error occurred while processing the request.";
+            response.Result = false;
+
+            return response;
+        }
+    }
+
+    public async Task<AuthResponse<bool>> ResetPassword(ResetPasswordRequest request)
+    {
+        var response = new AuthResponse<bool>
+        {
+            StatusCode = HttpStatusCode.OK,
+            Message = "Passowrd has successfully been reset.",
+            Result = true
+        };
+
+        try
+        {
+            var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(request.Token)));
+
+            var resetToken = await _authRepository.GetPasswordResetToken(tokenHash);
+
+            if (resetToken == null || resetToken.ExpiryDate < DateTime.UtcNow || resetToken.UsedDate != null)
+            {
+                response.Message = "Reset token is invalid.";
+                response.StatusCode = HttpStatusCode.Unauthorized;
+                response.Result = false;
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                response.Message = "Password has not been provided.";
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Result = false;
+                return response;
+            }
+
+            if (request.Password.Length < 8)
+            {
+                response.Message = "Password length must be greater than or equal to 8 characters.";
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Result = false;
+                return response;
+            }
+
+            var passwordHash = HashPassword(request.Password);
+
+            await _authRepository.UpdateUserPassword(resetToken.UserId, passwordHash);
+            await _authRepository.MarkTokenAsUsed(TokenType.Password, resetToken.Id, DateTime.UtcNow);
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
+            _logger.LogError(errorMessage);
+
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            response.Message = "An error occurred while processing the request.";
+            response.Result = false;
 
             return response;
         }
