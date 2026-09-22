@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'src/backend/**'
+      - 'src/tests/**'
+      - 'Ticketio.slnx'
     branches:
       - development
 
