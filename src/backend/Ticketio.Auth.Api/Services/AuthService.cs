@@ -1,36 +1,37 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Ticketio.Auth.Api.Config;
 using Ticketio.Auth.Api.Enums;
 using Ticketio.Auth.Api.Interfaces.Repositories;
 using Ticketio.Auth.Api.Interfaces.Services;
 using Ticketio.Auth.Api.Models.Data;
 using Ticketio.Auth.Api.Models.Requests;
-using Ticketio.Auth.Api.Models.Responses;
+using Ticketio.Core.Configuration;
+using Ticketio.Core.Models.Responses;
 
 namespace Ticketio.Auth.Api.Services;
 
 public class AuthService : IAuthService
 {
     private readonly ILogger<AuthService> _logger;
-    private readonly JwtSettings _jwtSettings;
+    private readonly JwtConfig _jwtConfig;
     private readonly IAuthRepository _authRepository;
 
-    public AuthService(ILogger<AuthService> logger, JwtSettings jwtSettings, IAuthRepository authRepository)
+    public AuthService(ILogger<AuthService> logger, IOptions<JwtConfig> options, IAuthRepository authRepository)
     {
         _logger = logger;
-        _jwtSettings = jwtSettings;
+        _jwtConfig = options.Value;
         _authRepository = authRepository;
     }
 
-    public async Task<AuthResponse<string>> Register(RegisterRequest request)
+    public async Task<ResultResponse<string>> Register(RegisterRequest request)
     {
-        var response = new AuthResponse<string>
+        var response = new ResultResponse<string>
         {
             StatusCode = HttpStatusCode.OK
         };
@@ -84,9 +85,9 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public async Task<AuthResponse<AuthToken>> Login(AuthRequest request)
+    public async Task<ResultResponse<AuthToken>> Login(AuthRequest request)
     {
-        var response = new AuthResponse<AuthToken>
+        var response = new ResultResponse<AuthToken>
         {
             StatusCode = HttpStatusCode.OK
         };
@@ -134,9 +135,9 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public async Task<AuthResponse<AuthToken>> Refresh(TokenRequest request)
+    public async Task<ResultResponse<AuthToken>> Refresh(TokenRequest request)
     {
-        var response = new AuthResponse<AuthToken>
+        var response = new ResultResponse<AuthToken>
         {
             StatusCode = HttpStatusCode.OK
         };
@@ -196,9 +197,9 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public async Task<AuthResponse<bool>> ForgotPassword(ForgotPasswordRequest request)
+    public async Task<ResultResponse<bool>> ForgotPassword(ForgotPasswordRequest request)
     {
-        var response = new AuthResponse<bool>
+        var response = new ResultResponse<bool>
         {
             StatusCode = HttpStatusCode.OK,
             Message = "If an account exists for this email, a password reset link will be sent shortly.",
@@ -257,9 +258,9 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task<AuthResponse<bool>> ValidateResetToken(string token)
+    public async Task<ResultResponse<bool>> ValidateResetToken(string token)
     {
-        var response = new AuthResponse<bool>
+        var response = new ResultResponse<bool>
         {
             StatusCode = HttpStatusCode.OK,
             Result = true
@@ -302,9 +303,9 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task<AuthResponse<bool>> ResetPassword(ResetPasswordRequest request)
+    public async Task<ResultResponse<bool>> ResetPassword(ResetPasswordRequest request)
     {
-        var response = new AuthResponse<bool>
+        var response = new ResultResponse<bool>
         {
             StatusCode = HttpStatusCode.OK,
             Message = "Passowrd has successfully been reset.",
@@ -369,7 +370,7 @@ public class AuthService : IAuthService
         {
             UserId = user.UserId,
             RefreshToken = refreshToken,
-            ExpiryDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
+            ExpiryDate = DateTime.UtcNow.AddDays(_jwtConfig.RefreshTokenExpiryDays)
         };
 
         await _authRepository.SaveToken(token);
@@ -390,14 +391,14 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
+            issuer: _jwtConfig.Issuer,
+            audience: _jwtConfig.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwtConfig.AccessTokenExpiryMinutes),
             signingCredentials: creds
         );
 
