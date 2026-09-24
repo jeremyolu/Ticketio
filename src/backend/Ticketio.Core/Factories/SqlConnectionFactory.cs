@@ -1,8 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
-using Ticketio.Auth.Api.Interfaces.Factories;
+using Ticketio.Core.Interfaces.Factories;
 
-namespace Ticketio.Auth.Api.Factories;
+namespace Ticketio.Core.Factories;
 
 public class SqlConnectionFactory : IDbConnectionFactory
 {

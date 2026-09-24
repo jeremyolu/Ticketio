@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace Ticketio.Auth.Api.Interfaces.Factories;
+namespace Ticketio.Core.Interfaces.Factories;
 
 public interface IDbConnectionFactory
 {

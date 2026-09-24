@@ -1,9 +1,9 @@
 ﻿using Dapper;
 using Ticketio.Auth.Api.Enums;
-using Ticketio.Auth.Api.Interfaces.Factories;
 using Ticketio.Auth.Api.Interfaces.Repositories;
 using Ticketio.Auth.Api.Models.Data;
 using Ticketio.Auth.Api.Models.Requests;
+using Ticketio.Core.Interfaces.Factories;
 
 namespace Ticketio.Auth.Api.Repositories;
 

@@ -1,10 +1,9 @@
 ﻿using System.Net;
 
-namespace Ticketio.Auth.Api.Models.Responses;
+namespace Ticketio.Core.Models.Responses;
 
-public class AuthResponse<T>
+public class BaseResponse
 {
     public required HttpStatusCode StatusCode { get; set; }
     public string? Message { get; set; }
-    public T? Result { get; set; }
 }

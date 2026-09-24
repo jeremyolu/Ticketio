@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using Ticketio.Auth.Api.Interfaces.Services;
-using Ticketio.Auth.Api.Models.Data;
 using Ticketio.Auth.Api.Models.Requests;
+using Ticketio.Core.Api;
 
 namespace Ticketio.Auth.Api.Controllers;
 
