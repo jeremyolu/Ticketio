@@ -159,9 +159,9 @@ public class AuthService : IAuthService
         {
             var token = await _authRepository.GetToken(request.RefreshToken);
 
-            if (token == null || token.IsRevoked || token.IsUsed || token.CreatedDate < DateTime.UtcNow)
+            if (token == null || token.IsRevoked || token.CreatedDate < DateTime.UtcNow)
             {
-                _logger.LogWarning($"Refresh token rejected. Exists: {token?.IsRevoked}, Revoked: {token?.IsRevoked}, Used: {token?.IsUsed}, " +
+                _logger.LogWarning($"Invalid or expired refresh token: {token?.Id}, Revoked: {token?.IsRevoked}, " +
                     $"Expired: {token?.ExpiryDate < DateTime.UtcNow}");
 
                 response.Message = "Invalid or expired refresh token.";
