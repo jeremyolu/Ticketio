@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace Ticketio.Auth.Api.Controllers;
+namespace Ticketio.Core.Api;
 
 public class BaseController : ControllerBase
 {

@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ticketio.Core\Ticketio.Core.csproj" />
+  </ItemGroup>
+
 </Project>
