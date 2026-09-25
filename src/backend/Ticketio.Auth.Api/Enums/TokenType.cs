@@ -2,6 +2,7 @@
 
 public enum TokenType
 {
+    Verification,
     Refresh,
-    Password
+    Reset
 }
