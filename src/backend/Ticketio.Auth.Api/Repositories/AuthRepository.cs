@@ -18,7 +18,7 @@ public class AuthRepository : IAuthRepository
 
     public async Task<User?> GetUserById(Guid id)
     {
-        var sql = "SELECT * FROM Users WHERE Id = @id;";
+        var sql = "SELECT * FROM Ticketio.Users WHERE Id = @id;";
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -27,7 +27,7 @@ public class AuthRepository : IAuthRepository
 
     public async Task<User?> GetUserByEmail(string email)
     {
-        var sql = "SELECT * FROM Users WHERE Email = @email;";
+        var sql = "SELECT * FROM Ticketio.Users WHERE Email = @email;";
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -36,7 +36,7 @@ public class AuthRepository : IAuthRepository
 
     public async Task<bool> RegisterUser(RegisterRequest request)
     {
-        var sql = "INSERT INTO Users (Email, Password, Name, Surname) VALUES (@email, @password, @name, @surname);";
+        var sql = "INSERT INTO Ticketio.Users (Email, Password, Name, Surname) VALUES (@email, @password, @name, @surname);";
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -53,16 +53,16 @@ public class AuthRepository : IAuthRepository
 
     public async Task<bool> UpdateUserPassword(Guid id, string password)
     {
-        var sql = "UPDATE Users SET Password = @password WHERE UserId = @id";
+        var sql = "UPDATE Ticketio.Users SET Password = @password WHERE UserId = @id";
 
         using var connection = _connectionFactory.CreateConnection();
 
         return await connection.ExecuteAsync(sql, new { id, password }) > 0;
     }
 
-    public async Task<bool> SaveToken(Token token)
+    public async Task<bool> SaveToken(RefreshToken token)
     {
-        var sql = "INSERT INTO Tokens (UserId, ExpiryDate) VALUES (@userId, @expiryDate);";
+        var sql = "INSERT INTO Ticketio.RefreshTokens (UserId, ExpiryDate) VALUES (@userId, @expiryDate);";
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -75,29 +75,29 @@ public class AuthRepository : IAuthRepository
         return rowsAffected > 0;
     }
 
-    public async Task<Token?> GetToken(string refreshToken)
+    public async Task<RefreshToken?> GetToken(string refreshToken)
     {
-        var sql = "SELECT * FROM Tokens WHERE RefreshToken = @refreshToken;";
+        var sql = "SELECT * FROM Ticketio.RefreshTokens WHERE RefreshToken = @refreshToken;";
 
         using var connection = _connectionFactory.CreateConnection();
 
-        return await connection.QueryFirstOrDefaultAsync<Token>(sql, new { refreshToken });
+        return await connection.QueryFirstOrDefaultAsync<RefreshToken>(sql, new { refreshToken });
     }
 
-    public async Task<PasswordResetToken?> GetPasswordResetToken(string token)
+    public async Task<ResetToken?> GetPasswordResetToken(string resetToken)
     {
-        var sql = "SELECT * FROM PasswordResetTokens WHERE TokenHash = @token;";
+        var sql = "SELECT * FROM Ticketio.ResetTokens WHERE ResetToken = @resetToken;";
 
         using var connection = _connectionFactory.CreateConnection();
 
-        return await connection.QueryFirstOrDefaultAsync<PasswordResetToken>(sql, new { token });
+        return await connection.QueryFirstOrDefaultAsync<ResetToken>(sql, new { resetToken });
     }
 
     public async Task<bool> MarkTokenAsUsed(TokenType tokenType, Guid tokenId, DateTime usedDate)
     {
         var sql = tokenType == TokenType.Refresh ? 
-            "UPDATE Tokens SET UsedDate = @usedDate WHERE Id = @tokenId;" :
-            "UPDATE PasswordResetTokens SET UsedDate = @usedDate WHERE Id = @tokenId";
+            "UPDATE RefreshTokens SET UsedDate = @usedDate WHERE Id = @tokenId;" :
+            "UPDATE ResetTokens SET UsedDate = @usedDate WHERE Id = @tokenId";
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -122,7 +122,7 @@ public class AuthRepository : IAuthRepository
         return await connection.ExecuteAsync(sql, new { userId }) > 0;
     }
 
-    public async Task<bool> CreatePasswordResetToken(PasswordResetToken token)
+    public async Task<bool> CreatePasswordResetToken(ResetToken token)
     {
         var sql = "INSERT INTO PasswordResetTokens (UserId, TokenHash, CreatedDate, ExpiryDate) VALUES (@userId, @tokenHash, @createdDate, @expiryDate);";
 

@@ -16,6 +16,7 @@ public partial class Program
         builder.Services.AddApiOptions();
         builder.Services.AddTokenConfig(configuration);
 
+        builder.Services.AddScoped<ITokenRepository, TokenRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
         builder.Services.AddScoped<IAuthService, AuthService>();
 

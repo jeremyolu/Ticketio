@@ -231,7 +231,7 @@ public class AuthService : IAuthService
 
             var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(GenerateToken())));
 
-            var passwordResetToken = new PasswordResetToken
+            var passwordResetToken = new ResetToken
             {
                 Id = Guid.NewGuid(),
                 UserId = user.UserId,
@@ -366,7 +366,7 @@ public class AuthService : IAuthService
     {
         var refreshToken = GenerateToken();
 
-        var token = new Token
+        var token = new RefreshToken
         {
             UserId = user.UserId,
             RefreshToken = refreshToken,
