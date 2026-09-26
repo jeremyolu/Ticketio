@@ -4,29 +4,23 @@ using Ticketio.Auth.Api.Repositories;
 using Ticketio.Auth.Api.Services;
 using Ticketio.Core.Extensions;
 
-public partial class Program
-{
-    private static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-        var configuration = builder.Configuration;
+var configuration = builder.Configuration;
 
-        builder.Services.AddDatabase(configuration);
-        builder.Services.AddApiOptions();
-        builder.Services.AddTokenConfig(configuration);
+builder.Services.AddDatabase(configuration);
+builder.Services.AddApiOptions();
+builder.Services.AddTokenConfig(configuration);
 
-        builder.Services.AddScoped<ITokenRepository, TokenRepository>();
-        builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-        builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
-        var app = builder.Build();
+var app = builder.Build();
 
-        app.UseHttpsRedirection();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapControllers();
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
-        app.Run();
-    }
-}
+app.Run();
