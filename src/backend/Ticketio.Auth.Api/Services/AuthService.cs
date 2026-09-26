@@ -23,6 +23,14 @@ public class AuthService : IAuthService
     private readonly IAuthRepository _authRepository;
     private readonly ITokenRepository _tokenRepository;
 
+    private static readonly Regex EmailRegex = new(
+    @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+    RegexOptions.Compiled);
+
+    private static readonly Regex PasswordRegex = new(
+        @"^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$",
+        RegexOptions.Compiled);
+
     public AuthService(ILogger<AuthService> logger, IOptions<JwtConfig> options, 
         IAuthRepository authRepository, ITokenRepository tokenRepository)
     {
@@ -37,8 +45,7 @@ public class AuthService : IAuthService
         var response = new ResultResponse<string>
         {
             StatusCode = HttpStatusCode.OK,
-            Message = "User account successfully created.",
-            Result = request.Email
+            Message = "User account successfully created."
         };
 
         if (request == null)
@@ -50,17 +57,23 @@ public class AuthService : IAuthService
 
         try
         {
-            var emailRegex = new Regex(@"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$");
-            var passwordRegex = new Regex(@"^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$");
-
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || 
-                !emailRegex.IsMatch(request.Email) || !passwordRegex.IsMatch(request.Password))
+                !EmailRegex.IsMatch(request.Email) || !PasswordRegex.IsMatch(request.Password))
                 {
                     response.Message = "Registration details are invalid. " +
                         "Ensure the email address is valid and the password contains at least 8 characters, 1 symbol and 1 digit.";
                     response.StatusCode = HttpStatusCode.BadRequest;
                     return response;
                 }
+
+            var userExist = await _authRepository.GetUserAsync(request.Email);
+
+            if (userExist != null)
+            {
+                response.Message = "User account already exists. Please use another email address.";
+                response.StatusCode = HttpStatusCode.Conflict;
+                return response;
+            }
 
             request.Password = HashPassword(request.Password);
 
@@ -78,7 +91,7 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
-            _logger.LogError(errorMessage);
+            _logger.LogError(ex, errorMessage);
 
             response.StatusCode = HttpStatusCode.InternalServerError;
             response.Message = "An error occurred while processing the request.";
