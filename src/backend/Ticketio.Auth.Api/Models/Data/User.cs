@@ -8,5 +8,6 @@ public class User
     public required string Name { get; set; }
     public required string Surname { get; set; }
     public int RoleId { get; set; }
+    public required string Role { get; set; }
     public DateTime CreatedDate { get; set; }
 }

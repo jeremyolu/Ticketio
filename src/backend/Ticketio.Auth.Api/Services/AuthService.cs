@@ -21,19 +21,31 @@ public class AuthService : IAuthService
     private readonly ILogger<AuthService> _logger;
     private readonly JwtConfig _jwtConfig;
     private readonly IAuthRepository _authRepository;
+    private readonly ITokenRepository _tokenRepository;
 
-    public AuthService(ILogger<AuthService> logger, IOptions<JwtConfig> options, IAuthRepository authRepository)
+    private static readonly Regex EmailRegex = new(
+    @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+    RegexOptions.Compiled);
+
+    private static readonly Regex PasswordRegex = new(
+        @"^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$",
+        RegexOptions.Compiled);
+
+    public AuthService(ILogger<AuthService> logger, IOptions<JwtConfig> options, 
+        IAuthRepository authRepository, ITokenRepository tokenRepository)
     {
         _logger = logger;
         _jwtConfig = options.Value;
         _authRepository = authRepository;
+        _tokenRepository = tokenRepository;
     }
 
     public async Task<ResultResponse<string>> Register(RegisterRequest request)
     {
         var response = new ResultResponse<string>
         {
-            StatusCode = HttpStatusCode.OK
+            StatusCode = HttpStatusCode.OK,
+            Message = "User account successfully created."
         };
 
         if (request == null)
@@ -45,11 +57,8 @@ public class AuthService : IAuthService
 
         try
         {
-            var emailRegex = new Regex(@"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$");
-            var passwordRegex = new Regex(@"^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$");
-
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || 
-                !emailRegex.IsMatch(request.Email) || !passwordRegex.IsMatch(request.Password))
+                !EmailRegex.IsMatch(request.Email) || !PasswordRegex.IsMatch(request.Password))
                 {
                     response.Message = "Registration details are invalid. " +
                         "Ensure the email address is valid and the password contains at least 8 characters, 1 symbol and 1 digit.";
@@ -57,9 +66,18 @@ public class AuthService : IAuthService
                     return response;
                 }
 
+            var userExist = await _authRepository.GetUserAsync(request.Email);
+
+            if (userExist != null)
+            {
+                response.Message = "User account already exists. Please use another email address.";
+                response.StatusCode = HttpStatusCode.Conflict;
+                return response;
+            }
+
             request.Password = HashPassword(request.Password);
 
-            var result = await _authRepository.RegisterUser(request);
+            var result = await _authRepository.RegisterUserAsync(request);
 
             if (!result)
             {
@@ -68,21 +86,18 @@ public class AuthService : IAuthService
                 return response;
             }
 
-            response.Message = "User account successfully created.";
-            response.Result = request.Email;
+            return response;
         }
         catch (Exception ex)
         {
             var errorMessage = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException?.Message : ex.Message;
-            _logger.LogError(errorMessage);
+            _logger.LogError(ex, errorMessage);
 
             response.StatusCode = HttpStatusCode.InternalServerError;
             response.Message = "An error occurred while processing the request.";
 
             return response;
         }
-
-        return response;
     }
 
     public async Task<ResultResponse<AuthToken>> Login(AuthRequest request)
@@ -108,7 +123,7 @@ public class AuthService : IAuthService
 
         try
         {
-            var user = await _authRepository.GetUserByEmail(request.Email);
+            var user = await _authRepository.GetUserAsync(request.Email);
 
             var isAuthenticated = VerifyPassword(request.Password, user?.Password);
 
@@ -119,7 +134,9 @@ public class AuthService : IAuthService
                 return response;
             }
 
-            response.Result = await GenerateAndSaveTokens(user);
+            response.Result = await GenerateAndSaveTokens(TokenType.Refresh, user);
+
+            return response;
         }
         catch (Exception ex)
         {
@@ -131,8 +148,6 @@ public class AuthService : IAuthService
 
             return response;
         }
-
-        return response;
     }
 
     public async Task<ResultResponse<AuthToken>> Refresh(TokenRequest request)
@@ -158,19 +173,19 @@ public class AuthService : IAuthService
 
         try
         {
-            var token = await _authRepository.GetToken(request.RefreshToken);
+            var token = await _tokenRepository.GetTokenAsync(TokenType.Refresh, request.RefreshToken);
 
             if (token == null || token.IsRevoked || token.CreatedDate < DateTime.UtcNow)
             {
                 _logger.LogWarning($"Invalid or expired refresh token: {token?.Id}, Revoked: {token?.IsRevoked}, " +
-                    $"Expired: {token?.ExpiryDate < DateTime.UtcNow}");
+                    $"Expired: {token?.ExpiresDate < DateTime.UtcNow}");
 
-                response.Message = "Invalid or expired refresh token.";
+                response.Message = "Invalid request..";
                 response.StatusCode = HttpStatusCode.Unauthorized;
                 return response;
             }
 
-            var user = await _authRepository.GetUserById(token.UserId);
+            var user = await _authRepository.GetUserAsync(token.UserId);
 
             if (user == null)
             {
@@ -179,9 +194,11 @@ public class AuthService : IAuthService
                 return response;
             }
 
-            await _authRepository.MarkTokenAsUsed(TokenType.Refresh, token.Id, DateTime.UtcNow);
+            await _tokenRepository.MarkTokenAsUsedAsync(TokenType.Refresh, token.Id, DateTime.UtcNow);
 
-            response.Result = await GenerateAndSaveTokens(user);
+            response.Result = await GenerateAndSaveTokens(TokenType.Refresh, user);
+
+            return response; ;
         }
         catch (Exception ex)
         {
@@ -193,8 +210,6 @@ public class AuthService : IAuthService
 
             return response;
         }
-
-        return response;
     }
 
     public async Task<ResultResponse<bool>> ForgotPassword(ForgotPasswordRequest request)
@@ -224,23 +239,21 @@ public class AuthService : IAuthService
 
         try
         {
-            var user = await _authRepository.GetUserByEmail(request.Email);
+            var user = await _authRepository.GetUserAsync(request.Email);
 
             if (user == null)
                 return response;
 
             var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(GenerateToken())));
 
-            var passwordResetToken = new PasswordResetToken
+            var token = new Token
             {
-                Id = Guid.NewGuid(),
                 UserId = user.UserId,
-                TokenHash = tokenHash,
-                CreatedDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddMinutes(30)
+                Hash = tokenHash,
+                ExpiresDate = DateTime.UtcNow.AddMinutes(30)
             };
 
-            await _authRepository.CreatePasswordResetToken(passwordResetToken);
+            await _tokenRepository.SaveTokenAsync(TokenType.Reset, token);
 
             return response;
 
@@ -278,9 +291,9 @@ public class AuthService : IAuthService
         {
             var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
-            var resetToken = await _authRepository.GetPasswordResetToken(tokenHash);
+            var resetToken = await _tokenRepository.GetTokenAsync(TokenType.Reset, tokenHash);
 
-            if (resetToken == null || resetToken.ExpiryDate < DateTime.UtcNow || resetToken.UsedDate != null)
+            if (resetToken == null || resetToken.ExpiresDate < DateTime.UtcNow || resetToken.UsedDate != null)
             {
                 response.Message = "Reset token is invalid.";
                 response.StatusCode = HttpStatusCode.Unauthorized;
@@ -316,9 +329,9 @@ public class AuthService : IAuthService
         {
             var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(request.Token)));
 
-            var resetToken = await _authRepository.GetPasswordResetToken(tokenHash);
+            var resetToken = await _tokenRepository.GetTokenAsync(TokenType.Reset, tokenHash);
 
-            if (resetToken == null || resetToken.ExpiryDate < DateTime.UtcNow || resetToken.UsedDate != null)
+            if (resetToken == null || resetToken.ExpiresDate < DateTime.UtcNow || resetToken.UsedDate != null)
             {
                 response.Message = "Reset token is invalid.";
                 response.StatusCode = HttpStatusCode.Unauthorized;
@@ -344,8 +357,8 @@ public class AuthService : IAuthService
 
             var passwordHash = HashPassword(request.Password);
 
-            await _authRepository.UpdateUserPassword(resetToken.UserId, passwordHash);
-            await _authRepository.MarkTokenAsUsed(TokenType.Password, resetToken.Id, DateTime.UtcNow);
+            await _authRepository.UpdateUserPasswordAsync(resetToken.UserId, passwordHash);
+            await _tokenRepository.MarkTokenAsUsedAsync(TokenType.Reset, resetToken.Id, DateTime.UtcNow);
 
             return response;
         }
@@ -362,18 +375,18 @@ public class AuthService : IAuthService
         }
     }
 
-    private async Task<AuthToken> GenerateAndSaveTokens(User user)
+    private async Task<AuthToken> GenerateAndSaveTokens(TokenType tokenType, User user)
     {
         var refreshToken = GenerateToken();
 
         var token = new Token
         {
             UserId = user.UserId,
-            RefreshToken = refreshToken,
-            ExpiryDate = DateTime.UtcNow.AddDays(_jwtConfig.RefreshTokenExpiryDays)
+            Hash = refreshToken,
+            ExpiresDate = DateTime.UtcNow.AddDays(_jwtConfig.RefreshTokenExpiryDays)
         };
 
-        await _authRepository.SaveToken(token);
+        await _tokenRepository.SaveTokenAsync(tokenType, token);
 
         return new AuthToken
         {
@@ -386,9 +399,9 @@ public class AuthService : IAuthService
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim("id", user.UserId.ToString()),
+            new Claim("email", user.Email),
+            new Claim("role", user.Role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Key));
