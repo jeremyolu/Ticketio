@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/backend/">
+    <Project Path="src/backend/Ticketio.Api/Ticketio.Api.csproj" Id="c832dfbb-bb13-47fa-ae19-7d1d41a00549" />
     <Project Path="src/backend/Ticketio.Auth.Api/Ticketio.Auth.Api.csproj" />
     <Project Path="src/backend/Ticketio.Core/Ticketio.Core.csproj" Id="9e85e6ca-3a35-4318-9d8e-ca73fc0c2b73" />
   </Folder>
