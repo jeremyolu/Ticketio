@@ -1,0 +1,26 @@
+name: Ticketio
+
+services:
+  ticketio-api:
+    build:
+      context: .
+      dockerfile: src/backend/Ticketio.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - ticketio-network
+    env_file:
+      - .env
+            
+  ticketio-auth:
+    build:
+      context: .
+      dockerfile: src/backend/Ticketio.Auth.Api/Dockerfile
+    networks:
+      - ticketio-network
+    env_file:
+      - .env
+    
+    
+networks:
+  ticketio-network:

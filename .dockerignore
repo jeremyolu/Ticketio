@@ -1,0 +1,26 @@
+# .NET build output
+**/bin/
+**/obj/
+
+# Visual Studio / IDE files
+.vs/
+.vscode/
+.idea/
+**/*.user
+**/*.suo
+
+# Git
+.git/
+.gitignore
+
+# Development environment / secrets
+.env
+.env.*
+**/appsettings.Development.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+**/*.log
