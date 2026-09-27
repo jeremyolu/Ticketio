@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Moq;
 using System.Net;
+using Ticketio.Auth.Api.Enums;
 using Ticketio.Auth.Api.Interfaces.Repositories;
 using Ticketio.Auth.Api.Models.Data;
 using Ticketio.Auth.Api.Models.Requests;
@@ -25,7 +26,7 @@ public class AuthServicetests
         _logger = new Mock<ILogger<AuthService>>();
         _jwtConfig = Options.Create(new JwtConfig
         {
-            Key = "key",
+            Key = "xK9mQ2vR7pL4nJ8wT3hF6cB1yZ5dS0aE",
             Issuer = "issuer",
             Audience = "audience",
             AccessTokenExpiryMinutes = 60,
@@ -203,4 +204,145 @@ public class AuthServicetests
         Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
     }
 
+    [Test]
+    public async Task Login_RequestIsNull_ReturnsBadRequestResponse()
+    {
+        // Arrange
+
+        var request = new AuthRequest
+        {
+            Email = "",
+            Password = ""
+        };
+
+        request = null;
+
+        // Act
+
+        var result = await _authService.Login(request);
+
+        // Assert
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Message, Is.EqualTo("Auth request body is null."));
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public async Task Login_InvalidRequestDetails_ReturnsBadRequestResponse()
+    {
+        // Arrange
+
+        var request = new AuthRequest
+        {
+            Email = "",
+            Password = ""
+        };
+
+
+        // Act
+
+        var result = await _authService.Login(request);
+
+        // Assert
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Message, Is.EqualTo("Login credentials have not been provided."));
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public async Task Login_InvalidCredentials_ReturnsUnauthorizedResponse()
+    {
+        // Arrange
+
+        var request = new AuthRequest
+        {
+            Email = "joe.blogs@email.com",
+            Password = "P@$$word!2*"
+        };
+
+        var user = new User
+        {
+            Email = request.Email,
+            Password = BCrypt.Net.BCrypt.HashPassword("Paswword!1*"),
+            Name = "Liam",
+            Surname = "Golden",
+            Role = "Buyer"
+        };
+
+        _authRepository.Setup(x => x.GetUserAsync(request.Email)).ReturnsAsync(user);
+
+        // Act
+
+        var result = await _authService.Login(request);
+
+        // Assert
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Message, Is.EqualTo("Invalid user credentials."));
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
+
+    [Test]
+    public async Task Login_ValidCredentials_ReturnsUnauthorizedResponse()
+    {
+        // Arrange
+
+        var request = new AuthRequest
+        {
+            Email = "joe.blogs@email.com",
+            Password = "Paswword!1*"
+        };
+
+        var user = new User
+        {
+            Email = request.Email,
+            Password = BCrypt.Net.BCrypt.HashPassword("Paswword!1*"),
+            Name = "Liam",
+            Surname = "Golden",
+            Role = "Buyer"
+        };
+
+        _authRepository.Setup(x => x.GetUserAsync(request.Email)).ReturnsAsync(user);
+        _tokenRepository.Setup(x => x.SaveTokenAsync(TokenType.Refresh, It.IsAny<Token>()));
+
+        // Act
+
+        var result = await _authService.Login(request);
+
+        // Assert
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Message, Is.Null);
+        Assert.That(result.Result.AccessToken, Is.Not.Null);
+        Assert.That(result.Result.RefreshToken, Is.Not.Null);
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+        _tokenRepository.Verify(x => x.SaveTokenAsync(TokenType.Refresh, It.IsAny<Token>()), Times.Once);
+    }
+
+    [Test]
+    public async Task Login_LoginException_ReturnsInternalServerErrorResponse()
+    {
+        // Arrange
+
+        var request = new AuthRequest
+        {
+            Email = "joe.blogs@email.com",
+            Password = "Paswword!1*"
+        };
+
+        _authRepository.Setup(x => x.GetUserAsync(request.Email)).ThrowsAsync(new Exception("Database failure"));
+
+        // Act
+
+        var result = await _authService.Login(request);
+
+        // Assert
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Message, Is.EqualTo("An error occurred while processing the request."));
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+    }
 }
