@@ -37,7 +37,7 @@ jobs:
             -t registryticketio.azurecr.io/ticketio-api:${{ github.sha }} .
 
       - name: Scan API proxy image
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'registryticketio.azurecr.io/ticketio-api:${{ github.sha }}'
           format: 'table'
