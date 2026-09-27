@@ -134,7 +134,7 @@ public class AuthService : IAuthService
                 return response;
             }
 
-            response.Result = await GenerateAndSaveTokens(TokenType.Refresh, user);
+            response.Result = await GenerateAuthTokens(TokenType.Refresh, user);
 
             return response;
         }
@@ -196,7 +196,7 @@ public class AuthService : IAuthService
 
             await _tokenRepository.MarkTokenAsUsedAsync(TokenType.Refresh, token.Id, DateTime.UtcNow);
 
-            response.Result = await GenerateAndSaveTokens(TokenType.Refresh, user);
+            response.Result = await GenerateAuthTokens(TokenType.Refresh, user);
 
             return response; ;
         }
@@ -375,7 +375,7 @@ public class AuthService : IAuthService
         }
     }
 
-    private async Task<AuthToken> GenerateAndSaveTokens(TokenType tokenType, User user)
+    private async Task<AuthToken> GenerateAuthTokens(TokenType tokenType, User user)
     {
         var refreshToken = GenerateToken();
 
