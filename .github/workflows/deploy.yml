@@ -1,0 +1,50 @@
+name: Ticketio - Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/backend/Ticketio.Api/**'
+      - '.github/workflows/deployment.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-scan-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        run: az acr login --name registryTicketio
+
+      - name: Build API proxy image
+        run: |
+          docker build \
+            -f src/backend/Ticketio.Api/Dockerfile \
+            -t registryticketio.azurecr.io/ticketio-api:${{ github.sha }} .
+
+      - name: Scan API proxy image
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'registryticketio.azurecr.io/ticketio-api:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Push API proxy image
+        run: |
+          docker push registryticketio.azurecr.io/ticketio-api:${{ github.sha }}
