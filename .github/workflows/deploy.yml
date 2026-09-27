@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'src/backend/Ticketio.Api/**'
+      - 'src/backend/Ticketio.Auth.Api/**'
       - '.github/workflows/deploy.yml'
 
 permissions:
@@ -48,3 +49,22 @@ jobs:
       - name: Push API proxy image
         run: |
           docker push registryticketio.azurecr.io/ticketio-api:${{ github.sha }}
+
+      - name: Build Auth API image
+        run: |
+          docker build \
+            -f src/backend/Ticketio.Auth.Api/Dockerfile \
+            -t registryticketio.azurecr.io/ticketio-auth-api:${{ github.sha }} .
+
+      - name: Scan Auth API image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: 'registryticketio.azurecr.io/ticketio-auth-api:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Push Auth API image
+        run: |
+          docker push registryticketio.azurecr.io/ticketio-auth-api:${{ github.sha }}
