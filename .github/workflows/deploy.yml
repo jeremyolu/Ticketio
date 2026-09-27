@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'src/backend/Ticketio.Api/**'
-      - '.github/workflows/deployment.yml'
+      - '.github/workflows/deploy.yml'
 
 permissions:
   contents: read
