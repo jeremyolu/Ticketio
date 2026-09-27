@@ -82,15 +82,23 @@ Thumbs.db
 docker-compose.override.yml
 
 # Terraform
-**/.terraform/*
+
+# Working directory
+.terraform/
+
+# State files
 *.tfstate
 *.tfstate.*
-crash.log
-crash.*.log
+
+# Variable files
 *.tfvars
 *.tfvars.json
 
-# Terraform CLI config
+# Crash logs
+crash.log
+crash.*.log
+
+# Terraform CLI configuration
 .terraformrc
 terraform.rc
 
