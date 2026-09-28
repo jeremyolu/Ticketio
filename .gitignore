@@ -76,7 +76,7 @@ Thumbs.db
 .env
 .env.*
 !.env.example
-**/appsettings*.json
+**/appsettings.Development.json
 
 # Docker overrides
 docker-compose.override.yml
