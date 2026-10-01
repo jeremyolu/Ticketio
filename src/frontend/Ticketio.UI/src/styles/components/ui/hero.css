@@ -1,0 +1,13 @@
+.hero {
+  background-image: linear-gradient( rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.7)), var(--hero-bg);
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 30vh;
+}

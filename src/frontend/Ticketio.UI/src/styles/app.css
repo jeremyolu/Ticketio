@@ -1,0 +1,18 @@
+.page {
+  padding: 5px 15px;
+}
+
+h1.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 5px 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+h3.page-description {
+  font-size: 14px;
+  font-weight: 300;
+  margin: 5px 0;
+  color: #000000;
+}
