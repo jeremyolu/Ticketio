@@ -1,6 +1,17 @@
 name: Ticketio
 
 services:
+
+  ticketio-ui:
+    build:
+      context: .
+      dockerfile: src/frontend/Ticketio.UI/Dockerfile
+    ports:
+      - "3000:80"
+    networks:
+      - ticketio-network
+    env_file:
+      - .env
   ticketio-api:
     build:
       context: .
