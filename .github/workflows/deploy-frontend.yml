@@ -33,13 +33,13 @@ jobs:
         run: |
           docker build \
             -f src/frontend/Ticketio.UI/Dockerfile \
-            -t registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }} \
+            -t registryticketio.azurecr.io/ticketio-ui:${{ github.sha }} \
             .
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: 'registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }}'
+          image-ref: 'registryticketio.azurecr.io/ticketio-ui:${{ github.sha }}'
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
@@ -47,4 +47,4 @@ jobs:
 
       - name: Push frontend image
         run: |
-          docker push registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }}
+          docker push registryticketio.azurecr.io/ticketio-ui:${{ github.sha }}
