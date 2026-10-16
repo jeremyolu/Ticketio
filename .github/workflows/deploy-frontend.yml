@@ -34,7 +34,7 @@ jobs:
           docker build \
             -f src/frontend/Ticketio.UI/Dockerfile \
             -t registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }} \
-            src/frontend/Ticketio.UI
+            .
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@v0.36.0
