@@ -10,6 +10,11 @@ variable "project_name" {
   default     = "ticketio"
 }
 
+variable "latest_ui_image_tag" {
+  type        = string
+  description = "Git commit SHA used to tag the frontend UI container image"
+}
+
 variable "latest_auth_image_tag" {
   type        = string
   description = "Git commit SHA used to tag the Auth API container image"
