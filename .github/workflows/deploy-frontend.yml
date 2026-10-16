@@ -1,0 +1,50 @@
+name: Ticketio - Frontend Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/frontend/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-scan-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        run: az acr login --name registryTicketio
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -f src/frontend/Ticketio.UI/Dockerfile \
+            -t registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }} \
+            src/frontend/Ticketio.UI
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: 'registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Push frontend image
+        run: |
+          docker push registryticketio.azurecr.io/ticketio-frontend:${{ github.sha }}
