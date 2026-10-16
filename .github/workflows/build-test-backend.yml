@@ -1,4 +1,4 @@
-name: Ticketio - Build and Test
+name: Ticketio - Build and Test Backend
 
 on:
   push:

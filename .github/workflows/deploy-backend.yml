@@ -1,4 +1,4 @@
-name: Ticketio - Deployment
+name: Ticketio - Backend Deployment
 
 on:
   push:
