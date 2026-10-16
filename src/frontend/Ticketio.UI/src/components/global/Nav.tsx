@@ -1,6 +1,6 @@
 import { FaBullhorn, FaCompass, FaEnvelope, FaLocationArrow, FaMusic, FaTheaterMasks, FaUmbrellaBeach, FaUser } from 'react-icons/fa';
 import { FaTicket } from 'react-icons/fa6';
-import logo from '../../assets/images/logo.png';
+import logo from '../../assets/images/logo_black.png';
 
 import '../../styles/components/nav.css';
 
@@ -36,7 +36,7 @@ export default function Nav() {
 
       <div className="navbar-bottom">
         <div className="navbar-bottom-left">
-          <img src={logo} className="navbar-logo" alt="Ticketio Logo" />
+          <img src={logo} className="footer-logo" alt="Ticketio Logo" />
           <ul className="navbar-menu-items">
             <li><FaMusic size={iconSize} color={bottomNaviconColour} className="mr-10" />Concerts</li>
             <li><FaTheaterMasks size={iconSize} color={bottomNaviconColour} className="mr-10" />Shows</li>
