@@ -67,6 +67,58 @@ resource "azurerm_role_assignment" "aca_acr_pull" {
   principal_id         = azurerm_user_assigned_identity.aca.principal_id
 }
 
+resource "azurerm_container_app" "ui" {
+  name                         = "ca-${var.project_name}-ui"
+  container_app_environment_id = azurerm_container_app_environment.acaenv.id
+  resource_group_name          = azurerm_resource_group.ticketio.name
+  revision_mode                = "Single"
+  workload_profile_name        = "Consumption"
+
+  depends_on = [
+    azurerm_role_assignment.aca_acr_pull
+  ]
+
+  identity {
+    type = "UserAssigned"
+
+    identity_ids = [
+      azurerm_user_assigned_identity.aca.id
+    ]
+  }
+
+  registry {
+    server   = azurerm_container_registry.acr.login_server
+    identity = azurerm_user_assigned_identity.aca.id
+  }
+
+  ingress {
+    external_enabled = true
+    target_port      = 80
+
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  template {
+    container {
+      name   = "ui"
+      image  = "${azurerm_container_registry.acr.login_server}/ticketio-ui:${var.latest_ui_image_tag}"
+      cpu    = 0.25
+      memory = "0.5Gi"
+    }
+
+    min_replicas = 0
+    max_replicas = 1
+  }
+
+  tags = {
+    project    = var.project_name
+    managed_by = "terraform"
+  }
+}
+
 resource "azurerm_container_app" "auth" {
   name                         = "ca-${var.project_name}-auth-api"
   container_app_environment_id = azurerm_container_app_environment.acaenv.id
