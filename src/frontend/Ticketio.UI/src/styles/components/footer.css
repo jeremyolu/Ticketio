@@ -1,0 +1,64 @@
+.footer {
+  background-color: #000000;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px 0 10px 0;
+}
+
+.legal-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.separator {
+  color: #FFFFFF;
+  margin: 0px;
+}
+
+hr {
+  width: 50%;
+}
+
+.legal-menu-items {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: 8px;
+}
+
+.legal-menu-items li {
+  cursor: pointer;
+}
+
+.legal-menu-items li:hover {
+  color: #b4b3b3;
+}
+
+.footer-bottom {
+  text-align: center;
+}
+
+p.footer-text {
+  color: #FFFFFF;
+  font-size: 13px;
+  margin: 0;
+}
+
+.footer-disclaimer {
+  padding: 8px 10px;
+  text-align: left;
+}
+
+p.footer-disclaimer-text {
+  font-size: 10px;
+  font-style: italic;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.8;
+}

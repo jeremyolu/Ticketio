@@ -1,0 +1,12 @@
+.carousel-list {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+}
+
+.Carousel-list img {
+  width: 250px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}
