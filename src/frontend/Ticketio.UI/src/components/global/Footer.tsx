@@ -1,6 +1,6 @@
 import logo from '../../assets/images/logo_white.png';
 
-import '../../styles/components/footer.css';
+import '../../styles/global/footer.css';
 
 export default function Footer() {
   return (
@@ -20,7 +20,8 @@ export default function Footer() {
               <h3>Explore</h3>
               <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="/events">Browse Events</a></li>
+                <li><a href="/events">Tickets</a></li>
+                <li><a href="/events">Events</a></li>
               </ul>
             </div>
 
@@ -28,7 +29,8 @@ export default function Footer() {
               <h3>Account</h3>
               <ul>
                 <li><a href="/login">Login</a></li>
-                <li><a href="/register">Create Account</a></li>
+                <li><a href="/register">Register</a></li>
+                <li><a href="/register">Help</a></li>
               </ul>
             </div>
 
@@ -37,7 +39,7 @@ export default function Footer() {
               <ul>
                 <li><a href="/purchase-policy">Purchase Policy</a></li>
                 <li><a href="/privacy-policy">Privacy Policy</a></li>
-                <li><a href="/cookies">Cookies</a></li>
+                <li><a href="/cookies">Cookies Policy</a></li>
               </ul>
             </div>
           </div>

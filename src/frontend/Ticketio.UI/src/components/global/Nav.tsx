@@ -2,7 +2,7 @@ import { FaBullhorn, FaCompass, FaEnvelope, FaLocationArrow, FaMusic, FaTheaterM
 import { FaTicket } from 'react-icons/fa6';
 import logo from '../../assets/images/logo_black.png';
 
-import '../../styles/components/nav.css';
+import '../../styles/global/nav.css';
 
 const iconSize = 13;
 const topNaviconColour = 'white';
