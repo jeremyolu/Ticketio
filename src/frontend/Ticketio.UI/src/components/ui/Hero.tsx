@@ -1,6 +1,6 @@
 import { type CSSProperties, type ReactNode } from 'react';
 
-import '../../styles/components/ui/hero.css';
+import '../../styles/ui/hero.css';
 
 export default function Hero( { bgUrl, children } : { bgUrl: string, children: ReactNode} ) {
 

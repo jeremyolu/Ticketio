@@ -1,27 +1,59 @@
-import '../../styles/components/footer.css';
+import logo from '../../assets/images/logo_white.png';
+
+import '../../styles/global/footer.css';
 
 export default function Footer() {
-
   return (
     <footer className="footer">
-      <div className="footer-top">
-       
-      </div>
+      <div className="footer-container">
 
-      <div className="footer-bottom">
+        <div className="footer-top">
+          <div className="footer-brand">
+            <img src={logo} className="footer-logo" alt="Ticketio Logo" />
+            <p className="footer-tagline">
+              Discover events. Experience more.
+            </p>
+          </div>
+
+          <div className="footer-links">
+            <div className="footer-link-group">
+              <h3>Explore</h3>
+              <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/events">Tickets</a></li>
+                <li><a href="/events">Events</a></li>
+              </ul>
+            </div>
+
+            <div className="footer-link-group">
+              <h3>Account</h3>
+              <ul>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+                <li><a href="/register">Help</a></li>
+              </ul>
+            </div>
+
+            <div className="footer-link-group">
+              <h3>Legal</h3>
+              <ul>
+                <li><a href="/purchase-policy">Purchase Policy</a></li>
+                <li><a href="/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/cookies">Cookies Policy</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div className="footer-disclaimer">
-          <p className="footer-disclaimer-text">Note: This is a development/portfolio project and is not a real ticketing service.</p>
-          <p className="footer-disclaimer-text">All events, artists and content shown are entirely fictional and should not be considered legitimate.</p>
+          <p>Ticketio is a development and portfolio project, not a real ticketing service. All events, artists and content displayed are fictional.</p>
         </div>
-        <div className="legal-section">
-          <ul className="legal-menu-items">
-            <li>Purchase Policy</li><span className="separator">|</span>
-            <li>Privacy Policy</li><span className="separator">|</span>
-            <li>Cookies</li><span className="separator">|</span>
-            <li>Manage Cookies</li>
-          </ul>
-           <p>2026 Ticketio. Developed by JO</p>
+
+        <div className="footer-bottom">
+          <p>Ticketio. Developed by JO.</p>
+          <p>Built for demonstration purposes.</p>
         </div>
+
       </div>
     </footer>
   );

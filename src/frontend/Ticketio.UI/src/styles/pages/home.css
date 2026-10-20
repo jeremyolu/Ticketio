@@ -1,35 +1,390 @@
+/* ---------- Tokens ---------- */
+:root {
+  --tk-ink: #1A1730;
+  --tk-muted: #6B6785;
+  --tk-highlight: #FFB020;
+  --tk-surface: #F4F2FA;
+  --tk-line: #D9D5E6;
+}
+
+/* ---------- Hero / search ---------- */
 
 .search-content {
   color: #000000;
 }
 
 h1.search-title {
-  font-size: 36px;
-  font-weight: 400;
-  margin-bottom: 20px;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.search-subtitle {
+  font-size: 18px;
+  margin: 0 0 20px 0;
 }
 
 .search-search {
   background-color: #FFFFFF;
-  padding: 20px;
+  padding: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(26, 23, 48, 0.18);
 }
 
 .search-content .form-control {
   font-size: 16px;
   width: 100%;
   border: none;
+  padding: 10px 12px;
 }
 
+.search-content .form-control:focus {
+  outline: none;
+}
+
+.search-search:focus-within {
+  outline: 3px solid var(--tk-accent);
+}
+
+.search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.search-chip {
+  background-color: rgba(255, 255, 255, 0.92);
+  color: var(--tk-ink);
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.search-chip:hover {
+  background-color: #FFFFFF;
+}
+
+.search-chip:focus-visible,
+.category-tile:focus-visible,
+.home-link:focus-visible,
+.ticket-button:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 2px;
+}
+
+/* ---------- Sections ---------- */
 .promotion-section {
   padding: 30px 0 0 0;
 }
 
-.featured-section {
+.home-section {
+  padding: 48px 0;
+}
+
+.home-section-tinted {
+  background-color: var(--tk-surface);
+}
+
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.home-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.home-section-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--tk-ink);
+  margin: 0 0 20px 0;
+}
+
+.home-section-header .home-section-title {
+  margin-bottom: 0;
+}
+
+.home-link {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: #000000;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Categories ---------- */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.category-tile {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  height: 180px;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #FFFFFF;
+  text-align: left;
+}
+
+/* dark gradient so the label stays readable on any photo */
+
+.category-label {
+  position: relative;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ---------- Ticket cards ---------- */
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.ticket-card {
+  position: relative;
+  display: flex;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(26, 23, 48, 0.08);
+}
+
+/* notches where the stub tears off */
+.ticket-card::before,
+.ticket-card::after {
+  content: "";
+  position: absolute;
+  left: 79px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--tk-surface);
+}
+
+.ticket-card::before {
+  top: -9px;
+}
+
+.ticket-card::after {
+  bottom: -9px;
+}
+
+.ticket-date {
+  flex: 0 0 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 8px;
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 12px 0 0 12px;
   text-align: center;
-  padding: 15px;
+}
+
+.ticket-weekday,
+.ticket-month {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ticket-day {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ticket-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-left: 2px dashed var(--tk-line);
+}
+
+.ticket-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ticket-category {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tk-accent);
+}
+
+.ticket-badge {
+  background-color: var(--tk-highlight);
+  color: var(--tk-ink);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.ticket-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tk-ink);
+  margin: 0 0 4px 0;
+}
+
+.ticket-venue {
+  font-size: 14px;
+  color: var(--tk-muted);
+  margin: 0 0 16px 0;
+}
+
+.ticket-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.ticket-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tk-ink);
+}
+
+.ticket-price-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--tk-muted);
+}
+
+.ticket-button {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* ---------- Perks ---------- */
+.perks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.perk-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tk-ink);
+  margin: 0 0 6px 0;
+}
+
+.perk-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--tk-muted);
+  margin: 0;
+  max-width: 36ch;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1024px) {
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .category-tile {
+    height: 160px;
+  }
+
+  .ticket-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  h1.search-title {
+    font-size: 30px;
+  }
+
+  .search-subtitle {
+    font-size: 16px;
+  }
+
+  .search-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* chips scroll sideways instead of wrapping */
+  .search-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .search-chip {
+    flex: 0 0 auto;
+  }
+
+  .home-section {
+    padding: 32px 0;
+  }
+
+  .home-section-title {
+    font-size: 22px;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .category-tile {
+    height: 130px;
+    padding: 12px;
+  }
+
+  .category-label {
+    font-size: 16px;
+  }
+
+  .ticket-grid,
+  .perks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .perks-grid {
+    gap: 24px;
+  }
 }

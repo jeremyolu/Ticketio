@@ -1,0 +1,152 @@
+.footer {
+  background-color: #080808;
+  color: #ffffff;
+  width: 100%;
+  padding: 60px 0 20px;
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Top Section */
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 60px;
+  padding-bottom: 50px;
+}
+
+.footer-brand {
+  max-width: 320px;
+}
+
+.footer-logo {
+  width: 150px;
+  height: auto;
+  cursor: pointer;
+}
+
+.footer-tagline {
+  font-size: 14px;
+  font-style: italic;
+  color: #FFFFFF;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Navigation */
+
+.footer-links {
+  display: flex;
+  gap: 80px;
+}
+
+.footer-link-group h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 20px;
+  color: #ffffff;
+}
+
+.footer-link-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-link-group li {
+  margin-bottom: 12px;
+}
+
+.footer-link-group a {
+  color: #999999;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.footer-link-group a:hover {
+  color: #ffffff;
+}
+
+/* Disclaimer */
+
+.footer-disclaimer {
+  border-top: 1px solid #252525;
+  padding: 22px 0;
+}
+
+.footer-disclaimer p {
+  color: #FFFFFF;
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 850px;
+}
+
+/* Bottom Section */
+
+.footer-bottom {
+  border-top: 1px solid #252525;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-bottom p {
+  font-size: 11px;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .footer-top {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .footer-links {
+    width: 100%;
+    justify-content: space-between;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer {
+    padding-top: 40px;
+  }
+
+  .footer-container {
+    padding: 0 20px;
+  }
+
+  .footer-top {
+    padding-bottom: 35px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 35px 50px;
+  }
+
+  .footer-link-group {
+    min-width: 110px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

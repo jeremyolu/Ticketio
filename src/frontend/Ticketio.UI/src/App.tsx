@@ -2,24 +2,28 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
+import RegisterPage from './pages/RegisterPage';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/auth/DashboardPage';
 
-import Nav from './components/global/Nav';
-import Footer from './components/global/Footer';
+import MainLayout from './layouts/MainLayout';
 
-import './styles/app.css';
-
+import './styles/global/app.css';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Nav />
-      <main>
-        <Routes>
+      <Routes>
+
+        <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
-        </Routes>
-      </main>
-      <Footer />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
+
+      </Routes>
     </BrowserRouter>
-  )
+  );
 }
